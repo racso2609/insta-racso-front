@@ -97,7 +97,7 @@ export const createPostRequest = async (
 
 export const getPostRequest = async (
   token: string | null,
-  pagination: { limit: string; page: string }
+  pagination: { limit: number; page: number}
 ) => {
   try {
     const { limit, page } = pagination;

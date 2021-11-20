@@ -7,14 +7,15 @@ import AuthContext from "../auth/authContext";
 
 interface IPostContext {
   getPosts?: () => void;
-  page?: string;
-  limit?: string;
+  page?: number;
+  limit?: number;
   posts?: IPost[];
   createPost?: (data: FormData) => void;
   changePage?: (nextPage: number) => void;
+  setPostLimit?: (limit: number) => void;
 }
 
-export interface IUser{
+export interface IUser {
   firstName: string;
   lastName: string;
   _id: string;
@@ -32,8 +33,8 @@ export interface IPost {
 }
 
 const defaultState = {
-  page: "1",
-  limit: "20",
+  page: 1,
+  limit: 20,
   posts: [] as IPost[],
 };
 
@@ -51,9 +52,12 @@ export const PostProvider: FC = ({ children }) => {
     if (!posts?.length) return;
     setPosts(posts);
   };
+  const setPostLimit = (limit:number) => {
+    setLimit(limit);
+  };
 
   const changePage = (nextPage: number) => {
-    setPage(nextPage.toString());
+    setPage(nextPage);
   };
 
   const createPost = (data: FormData) => {
@@ -62,14 +66,14 @@ export const PostProvider: FC = ({ children }) => {
   };
 
   useEffect(() => {
-    if(!auth) return;
+    if (!auth) return;
     getPost();
     //eslint-disable-next-line
   }, [page, limit, auth]);
 
   return (
     <PostContext.Provider
-      value={{ page, limit, posts, createPost, changePage }}
+      value={{ setPostLimit, page, limit, posts, createPost, changePage }}
     >
       {children}
     </PostContext.Provider>

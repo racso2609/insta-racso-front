@@ -16,7 +16,7 @@ export const Grid = styled.div<IGrid>`
   ${(props) => props.rows && `grid-template-rows: ${props.rows}`};
   ${(props) => props.gap && `gap: ${props.gap}`};
   ${(props) => props.justify && `justify-items: ${props.justify}`};
-  ${(props) => props.align && `align-items: ${props.align}`};
+  ${(props) => props.align && `align-content: ${props.align}`};
   ${(props) => props.height && `height: ${props.height}`};
   ${(props) => props.padding && `padding: ${props.padding}`};
 
