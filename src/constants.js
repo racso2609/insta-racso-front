@@ -3,4 +3,6 @@ export const CURRENT_USER = "/api/users/current-user";
 export const CREATE_POST = "/api/posts/me";
 export const GET_POST = "/api/posts/";
 
+export const LIKE_POST = '/api/likes'
+
 

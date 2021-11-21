@@ -25,7 +25,7 @@ const CreatePost: FC = () => {
     let data = new FormData();
     data.append("description", description.value);
     if (image.value) data.append("publication", image.value);
-    createPost(data);
+    if (createPost) createPost(data);
   };
 
   return (

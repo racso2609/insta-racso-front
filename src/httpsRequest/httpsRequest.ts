@@ -1,5 +1,11 @@
-import axios from "axios";
-import { CREATE_POST, CURRENT_USER, GET_POST, LOGIN } from "../constants";
+import axios, { AxiosError } from "axios";
+import {
+  CREATE_POST,
+  CURRENT_USER,
+  GET_POST,
+  LOGIN,
+  LIKE_POST,
+} from "../constants";
 import { IPost } from "../context/PostContext/PostContext";
 
 export interface ILoginResponse {
@@ -17,11 +23,24 @@ export interface IgetPost {
   posts: IPost[];
 }
 
-const handleError = (status: number, message: any): any => {
+export interface ILike {
+  user?: string;
+  _id?: string;
+  post?: string;
+}
+export interface ILikePost {
+  success: boolean;
+  status: string;
+  like: ILike;
+  likes?: ILike[];
+  liked?: boolean; 
+}
+
+const handleError = (status: number, message: string): any => {
   if (status === 401)
     return "You are not logged in. Please log in to perform this action!";
 
-  return message.data.error;
+  return message;
 };
 
 export const loginRequest = async (
@@ -30,16 +49,13 @@ export const loginRequest = async (
   try {
     const { data }: { data: ILoginResponse } = await axios.post(LOGIN, body);
     return data;
-  } catch (error) {
-    if (error) {
-      if (axios.isAxiosError(error)) {
-        const status = error?.response?.status || 0;
-        const message = error?.response;
-        throw handleError(status, message);
-      } else if (error instanceof Error) {
-        const message = error.message;
-        throw handleError(0, message);
-      }
+  } catch (err: AxiosError | any) {
+    if (err) {
+      if (err.response)
+        handleError(err.response.status, err.response.data.error);
+      else if (err.request)
+        handleError(err.request.status, err.request.data.error);
+      else handleError(500, "An internal error occurred");
     }
   }
 };
@@ -58,16 +74,13 @@ export const currentUserRequest = async (
 
     const { Token, name, email, role, phone } = data.user;
     return { Token, name, email, role, phone };
-  } catch (error) {
-    if (error) {
-      if (axios.isAxiosError(error)) {
-        const status = error?.response?.status || 0;
-        const message = error?.response;
-        throw handleError(status, message);
-      } else if (error instanceof Error) {
-        const message = error.message;
-        throw handleError(0, message);
-      }
+  } catch (err: AxiosError | any) {
+    if (err) {
+      if (err.response)
+        handleError(err.response.status, err.response.data.error);
+      else if (err.request)
+        handleError(err.request.status, err.request.data.error);
+      else handleError(500, "An internal error occurred");
     }
   }
 };
@@ -81,23 +94,20 @@ export const createPostRequest = async (
     await axios.post(CREATE_POST, data, {
       headers: { Authorization: token },
     });
-  } catch (error) {
-    if (error) {
-      if (axios.isAxiosError(error)) {
-        const status = error?.response?.status || 0;
-        const message = error?.response;
-        throw handleError(status, message);
-      } else if (error instanceof Error) {
-        const message = error.message;
-        throw handleError(0, message);
-      }
+  } catch (err: AxiosError | any) {
+    if (err) {
+      if (err.response)
+        handleError(err.response.status, err.response.data.error);
+      else if (err.request)
+        handleError(err.request.status, err.request.data.error);
+      else handleError(500, "An internal error occurred");
     }
   }
 };
 
 export const getPostRequest = async (
   token: string | null,
-  pagination: { limit: number; page: number}
+  pagination: { limit: number; page: number }
 ) => {
   try {
     const { limit, page } = pagination;
@@ -109,17 +119,99 @@ export const getPostRequest = async (
       }
     );
 
-    return data.posts ;
-  } catch (error) {
-    if (error) {
-      if (axios.isAxiosError(error)) {
-        const status = error?.response?.status || 0;
-        const message = error?.response;
-        throw handleError(status, message);
-      } else if (error instanceof Error) {
-        const message = error.message;
-        throw handleError(0, message);
-      }
+    return data.posts;
+  } catch (err: AxiosError | any) {
+    if (err) {
+      if (err.response)
+        handleError(err.response.status, err.response.data.error);
+      else if (err.request)
+        handleError(err.request.status, err.request.data.error);
+      else handleError(500, "An internal error occurred");
     }
+  }
+};
+
+export const likePostRequest = async (
+  token: string | null,
+  postId: string
+): Promise<ILikePost> => {
+  try {
+    if (!token) return { like: {}, success: false, status: "" };
+
+    const { data }: { data: ILikePost } = await axios.post(
+      `${LIKE_POST}/${postId}`,
+      null,
+      {
+        headers: { Authorization: token },
+      }
+    );
+
+    return data;
+  } catch (err: AxiosError | any) {
+    if (err) {
+      if (err.response)
+        handleError(err.response.status, err.response.data.error);
+      else if (err.request)
+        handleError(err.request.status, err.request.data.error);
+      else handleError(500, "An internal error occurred");
+    }
+    return { like: {}, success: false, status: "" };
+  }
+};
+
+export const unlikePostRequest = async (
+  token: string | null,
+  postId: string
+): Promise<ILikePost> => {
+  try {
+    if (!token) return { like: {}, success: false, status: "" };
+
+    const { data }: { data: ILikePost } = await axios.delete(
+      `${LIKE_POST}/${postId}`,
+      {
+        headers: { Authorization: token },
+      }
+    );
+
+    return data;
+  } catch (err: AxiosError | any) {
+    if (err) {
+      if (err.response)
+        handleError(err.response.status, err.response.data.error);
+      else if (err.request)
+        handleError(err.request.status, err.request.data.error);
+      else handleError(500, "An internal error occurred");
+    }
+    return { like: {}, success: false, status: "" };
+  }
+};
+
+export const postLikedByRequest = async (
+  token: string | null,
+  postId: string
+): Promise<{likes: ILike[], liked?: boolean}> => {
+  try {
+    if (!token) return {likes: []};
+
+    const { data }: { data: ILikePost } = await axios.get(
+      `${LIKE_POST}/${postId}`,
+      {
+        headers: { Authorization: token },
+      }
+    );
+    console.log('data', data)
+    const {likes} = data;
+    if(likes?.length)
+      return {likes};
+    else return {likes:[]}
+  } catch (err: AxiosError | any) {
+    if (err) {
+      if (err.response)
+        handleError(err.response.status, err.response.data.error);
+      else if (err.request)
+        handleError(err.request.status, err.request.data.error);
+      else handleError(500, "An internal error occurred");
+    }
+    return {likes:[]};
   }
 };

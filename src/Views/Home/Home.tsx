@@ -32,7 +32,7 @@ const Home: React.FC = () => {
       flexDirection="column"
     >
       <Grid padding='30px 0px' columns="1fr" gap='30px'>
-        {posts.map((post) => (
+        {posts && posts.map((post) => (
           <PostComponent post={post} key={post._id} />
         ))}
       </Grid>

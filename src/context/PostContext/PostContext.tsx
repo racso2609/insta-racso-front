@@ -2,8 +2,13 @@ import { createContext, FC, useContext, useEffect, useState } from "react";
 import {
   getPostRequest,
   createPostRequest,
+  likePostRequest,
+  unlikePostRequest,
+  postLikedByRequest,
+  ILike,
 } from "../../httpsRequest/httpsRequest";
 import AuthContext from "../auth/authContext";
+import { socket } from "../../sockets/index";
 
 interface IPostContext {
   getPosts?: () => void;
@@ -13,6 +18,9 @@ interface IPostContext {
   createPost?: (data: FormData) => void;
   changePage?: (nextPage: number) => void;
   setPostLimit?: (limit: number) => void;
+  likePost?: (postId: string) => Promise<boolean>;
+  unlikePost?: (postId: string) => Promise<boolean>;
+  getPostLikes?: (postId: string) => Promise<{likes:ILike[],liked?: boolean}>;
 }
 
 export interface IUser {
@@ -52,7 +60,24 @@ export const PostProvider: FC = ({ children }) => {
     if (!posts?.length) return;
     setPosts(posts);
   };
-  const setPostLimit = (limit:number) => {
+  const likePost = async (postId: string) => {
+    const { like } = await likePostRequest(getAuthToken(), postId);
+    if (!like) return false;
+    socket.emit("like", { like });
+    return true;
+  };
+  const unlikePost = async (postId: string) => {
+    const { like } = await unlikePostRequest(getAuthToken(), postId);
+    if (!like) return false;
+    socket.emit("unlike", { like });
+    return true;
+  };
+  const getPostLikes = async (postId: string) => {
+    const data = await postLikedByRequest(getAuthToken(), postId);
+    return data;
+  };
+
+  const setPostLimit = (limit: number) => {
     setLimit(limit);
   };
 
@@ -73,7 +98,17 @@ export const PostProvider: FC = ({ children }) => {
 
   return (
     <PostContext.Provider
-      value={{ setPostLimit, page, limit, posts, createPost, changePage }}
+      value={{
+        setPostLimit,
+        page,
+        limit,
+        posts,
+        createPost,
+        changePage,
+        likePost,
+        unlikePost,
+        getPostLikes,
+      }}
     >
       {children}
     </PostContext.Provider>
