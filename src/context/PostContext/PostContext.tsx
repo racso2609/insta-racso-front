@@ -8,7 +8,7 @@ import {
   ILike,
 } from "../../httpsRequest/httpsRequest";
 import AuthContext from "../auth/authContext";
-import { socket } from "../../sockets/index";
+import SocketIoContext from "../socketIo/socketIoContext";
 
 interface IPostContext {
   getPosts?: () => void;
@@ -20,7 +20,9 @@ interface IPostContext {
   setPostLimit?: (limit: number) => void;
   likePost?: (postId: string) => Promise<boolean>;
   unlikePost?: (postId: string) => Promise<boolean>;
-  getPostLikes?: (postId: string) => Promise<{likes:ILike[],liked?: boolean}>;
+  getPostLikes?: (
+    postId: string
+  ) => Promise<{ likes: ILike[]; liked: boolean }>;
 }
 
 export interface IUser {
@@ -53,6 +55,7 @@ export const PostProvider: FC = ({ children }) => {
   const [limit, setLimit] = useState(defaultState.limit);
   const [posts, setPosts] = useState<IPost[]>(defaultState.posts);
   const { getAuthToken, auth } = useContext(AuthContext);
+  const { socket } = useContext(SocketIoContext);
 
   const getPost = async () => {
     const pagination = { limit, page };
@@ -60,21 +63,22 @@ export const PostProvider: FC = ({ children }) => {
     if (!posts?.length) return;
     setPosts(posts);
   };
+
   const likePost = async (postId: string) => {
-    const { like } = await likePostRequest(getAuthToken(), postId);
-    if (!like) return false;
-    socket.emit("like", { like });
+    const data = await likePostRequest(getAuthToken(), postId);
+    if (!data || !data.like) return false;
     return true;
   };
   const unlikePost = async (postId: string) => {
-    const { like } = await unlikePostRequest(getAuthToken(), postId);
-    if (!like) return false;
-    socket.emit("unlike", { like });
+    const data = await unlikePostRequest(getAuthToken(), postId);
+    if (!data || !data.like) return false;
     return true;
   };
   const getPostLikes = async (postId: string) => {
     const data = await postLikedByRequest(getAuthToken(), postId);
+    if(data)
     return data;
+    else return {likes: [],liked: false}
   };
 
   const setPostLimit = (limit: number) => {

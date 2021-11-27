@@ -5,12 +5,18 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { AuthProvider } from "./context/auth/authContext";
 import { PostProvider } from "./context/PostContext/PostContext";
+import { ToastContainer } from "react-toastify";
+import { SocketProvider } from "./context/socketIo/socketIoContext";
+import "react-toastify/dist/ReactToastify.css";
 
 ReactDOM.render(
   <AuthProvider>
-    <PostProvider>
-      <App />
-    </PostProvider>
+    <SocketProvider>
+      <PostProvider>
+        <App />
+        <ToastContainer />
+      </PostProvider>
+    </SocketProvider>
   </AuthProvider>,
   document.getElementById("root")
 );

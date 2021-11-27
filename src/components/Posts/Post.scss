@@ -1,4 +1,7 @@
 .post{
+  .bold{
+    font-weight: bold;
+  }
   .post-header{
     .image-header-container{
       width: 50px;
@@ -12,4 +15,10 @@
     }
   }
 
+  .description{
+    margin: 0px;
+    span{
+      margin-right: 10px;
+    }
+  }
 }

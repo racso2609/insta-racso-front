@@ -1,7 +1,14 @@
-import { FC, useContext, useState, useEffect } from "react";
-import { IPost } from "../../context/PostContext/PostContext";
+import { FC } from "react";
 import { Button } from "../styledComponents/Button";
-import { ImagePost, PostContainer, PostHeader, PostContent } from "./styles";
+import { Input } from "../styledComponents/Inputs";
+import {
+  ImagePost,
+  PostContainer,
+  PostHeader,
+  PostContent,
+  LikesContainer,
+  CommentSection,
+} from "./styles";
 import { Grid } from "../GridSystem/GridSystem";
 import {
   faCommentDots,
@@ -9,55 +16,26 @@ import {
   faHeart,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import PostContext from "../../context/PostContext/PostContext";
 import "./Post.scss";
 import { Colors } from "../../GeneralStyles/colors";
-import { ILike } from "../../httpsRequest/httpsRequest";
+import Image from "../ImageContainer/index";
+import PostLogic from "./Logic";
+import { IPost } from "../../context/PostContext/PostContext";
 
-interface propsType {
-  post: IPost;
-  colorLike?: string;
-}
 const buttonsStyles = {
   fontSize: "1.3rem",
   background: "transparent",
   color: "lightgray",
   width: "100%",
 };
+interface propsType {
+  post: IPost;
+  colorLike?: string;
+}
 
 const { likeColor } = Colors;
 const PostComponent: FC<propsType> = ({ post, colorLike = likeColor }) => {
-  const { likePost, unlikePost, getPostLikes } = useContext(PostContext);
-  const [liked, setLiked] = useState(false);
-  const [personsWhoLike, setPersonsWhoLike] = useState<ILike[]>([]);
-
-  const likesOfMyPost = async () => {
-    if (!getPostLikes) return;
-    const data = await getPostLikes(post._id);
-    console.log(data)
-    if (typeof data.liked === "boolean") setLiked(data.liked);
-    if (data.likes) setPersonsWhoLike(data.likes);
-  };
-  useEffect(() => {
-    likesOfMyPost();
-  //eslint-disable-next-line
-  }, [liked, post._id]);
-
-  const like = async () => {
-    if (!likePost) return;
-    const success = await likePost(post._id);
-    setLiked(success);
-  };
-  const unlike = async () => {
-    if (!unlikePost) return;
-    const success = await unlikePost(post._id);
-    if (success) setLiked((prev) => !prev);
-  };
-  const onClickHearth = async () => {
-    if (liked) unlike();
-    else like();
-  };
-
+  const { onClickHearth, liked, personsWhoLike } = PostLogic({ post });
   return (
     <PostContainer className="post">
       <PostHeader className="post-header">
@@ -81,24 +59,44 @@ const PostComponent: FC<propsType> = ({ post, colorLike = likeColor }) => {
       )}
 
       <PostContent>
-        <Grid columns="repeat(3,1fr)">
-          <Button onClick={onClickHearth} {...buttonsStyles}>
-            <FontAwesomeIcon
-              icon={faHeart}
-              style={{ color: liked ? colorLike : "" }}
-            />
-          </Button>
+        <LikesContainer>
+          <Grid columns="repeat(3,1fr)">
+            <Button onClick={onClickHearth} {...buttonsStyles}>
+              <FontAwesomeIcon
+                icon={faHeart}
+                style={{ color: liked ? colorLike : "" }}
+              />
+            </Button>
 
-          <Button {...buttonsStyles}>
-            <FontAwesomeIcon icon={faCommentDots} />
-          </Button>
-          <Button {...buttonsStyles}>
-            <FontAwesomeIcon icon={faEllipsisV} />
-          </Button>
-        </Grid>
-        <span>{post.description}</span>
-        <p>{personsWhoLike.length} persons</p>
+            <Button {...buttonsStyles}>
+              <FontAwesomeIcon icon={faCommentDots} />
+            </Button>
+            <Button {...buttonsStyles}>
+              <FontAwesomeIcon icon={faEllipsisV} />
+            </Button>
+          </Grid>
+        </LikesContainer>
+        <PostContent justify="flex-start" direction="row">
+          <Image
+            alt="dots"
+            styles={{}}
+            src={process?.env?.REACT_APP_DEFAULT_USER_PHOTO || "Hola"}
+          />
+
+          <p style={{ marginLeft: 15 }}>
+            liked by {personsWhoLike.length} persons
+          </p>
+        </PostContent>
+        {post.description && (
+          <p className="description">
+            <span className="bold">{post.user.firstName}: </span>
+            {post.description}
+          </p>
+        )}
       </PostContent>
+      <CommentSection>
+        <Input width="100%" padding="5px 10px" placeholder="Add a comment..." />
+      </CommentSection>
     </PostContainer>
   );
 };
