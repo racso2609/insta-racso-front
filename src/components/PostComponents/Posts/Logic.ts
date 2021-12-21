@@ -1,7 +1,7 @@
-import { FC, useContext, useState, useEffect } from "react";
-import PostContext from "../../context/PostContext/PostContext";
-import { ILike } from "../../httpsRequest/httpsRequest";
-import { IPost } from "../../context/PostContext/PostContext";
+import { useContext, useState, useEffect } from "react";
+import PostContext from "../../../context/PostContext/PostContext";
+import { ILike } from "../../../httpsRequest/httpsRequest";
+import { IPost } from "../../../context/PostContext/PostContext";
 
 interface propsType {
   post: IPost;
@@ -13,7 +13,7 @@ interface returnType {
   liked: boolean;
 }
 
-const PostLogic = (props:propsType): returnType => {
+const PostLogic = (props: propsType): returnType => {
   const { post } = props;
   const { likePost, unlikePost, getPostLikes } = useContext(PostContext);
   const [liked, setLiked] = useState(false);
@@ -49,7 +49,7 @@ const PostLogic = (props:propsType): returnType => {
   return {
     onClickHearth,
     personsWhoLike,
-    liked
+    liked,
   };
 };
 

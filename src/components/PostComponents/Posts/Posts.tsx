@@ -1,6 +1,6 @@
 import { FC } from "react";
-import { Button } from "../styledComponents/Button";
-import { Input } from "../styledComponents/Inputs";
+import { Button } from "../../styledComponents/Button";
+import { Input } from "../../styledComponents/Inputs";
 import {
   ImagePost,
   PostContainer,
@@ -9,7 +9,7 @@ import {
   LikesContainer,
   CommentSection,
 } from "./styles";
-import { Grid } from "../GridSystem/GridSystem";
+import { Grid } from "../../GridSystem/GridSystem";
 import {
   faCommentDots,
   faEllipsisV,
@@ -17,10 +17,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./Post.scss";
-import { Colors } from "../../GeneralStyles/colors";
-import Image from "../ImageContainer/index";
+import { Colors } from "../../../GeneralStyles/colors";
+import Image from "../../ImageContainer/index";
 import PostLogic from "./Logic";
-import { IPost } from "../../context/PostContext/PostContext";
+import { IPost } from "../../../context/PostContext/PostContext";
 
 const buttonsStyles = {
   fontSize: "1.3rem",
@@ -34,6 +34,7 @@ interface propsType {
 }
 
 const { likeColor } = Colors;
+
 const PostComponent: FC<propsType> = ({ post, colorLike = likeColor }) => {
   const { onClickHearth, liked, personsWhoLike } = PostLogic({ post });
   return (
@@ -77,15 +78,17 @@ const PostComponent: FC<propsType> = ({ post, colorLike = likeColor }) => {
           </Grid>
         </LikesContainer>
         <PostContent justify="flex-start" direction="row">
-          <Image
-            alt="dots"
-            styles={{}}
-            src={process?.env?.REACT_APP_DEFAULT_USER_PHOTO || "Hola"}
-          />
-
-          <p style={{ marginLeft: 15 }}>
-            liked by {personsWhoLike.length} persons
-          </p>
+          {personsWhoLike.length > 0 && (
+            <>
+              <Image
+                alt="dots"
+                src={process?.env?.REACT_APP_DEFAULT_USER_PHOTO || "Hola"}
+              />
+              <p style={{ marginLeft: 15 }}>
+                liked by {personsWhoLike.length} persons
+              </p>
+            </>
+          )}
         </PostContent>
         {post.description && (
           <p className="description">

@@ -7,7 +7,7 @@ import {
   //faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import PostContext from "../../context/PostContext/PostContext";
-import PostComponent from "../../components/Posts/Posts";
+import PostComponent from "../../components/PostComponents/Posts/Posts";
 import { Grid } from "../../components/GridSystem/GridSystem";
 const sections = [
   {
